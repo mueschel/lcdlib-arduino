@@ -1,4 +1,4 @@
-#include "../font.h"
+#include "font.h"
 #ifdef FONTS_INCLUDE_font_fixed_8px
 
 

@@ -46,8 +46,11 @@
  *   - put_string and put_char functions now return the total width of the
  *     text in pixel
  *****************************************************************************/
+#include <pgmspace.h>
 
-#include "font.h"
+extern "C" {
+  #include "font.h"
+}
 
 /******************************************************************************
  * Global storage for easy-to-use putc functions
@@ -60,7 +63,7 @@ uint8_t global_font_style;
  * font          - Font identifier
  * style         - Style Modifier
  */
-inline void lcd_set_font(FONT_P font, uint8_t style){
+void lcd_set_font(FONT_P font, uint8_t style){
   global_font_select = font;
   global_font_style = style;
 }
@@ -72,12 +75,9 @@ inline void lcd_set_font(FONT_P font, uint8_t style){
 /******************************************************************************
  * Loads the pointer to the selected fonts data
  */
-inline PGM_P font_data(FONT_P font) {
+PGM_P font_data(FONT_P font) {
   PGM_P tmp;
-  if (sizeof(tmp) == 2)
-    tmp = (PGM_P)pgm_read_word(&(font->data));
-  else
-    memcpy_P((char*)&tmp,&(font->data),sizeof(tmp));
+  memcpy_P((void*)&tmp,&(font->data),sizeof(tmp));
   return tmp;
   }
 
@@ -85,12 +85,9 @@ inline PGM_P font_data(FONT_P font) {
 /******************************************************************************
  * Loads the pointer to the width table for the selected font
  */
-inline PGM_P font_widthtable(FONT_P font) {
+PGM_P font_widthtable(FONT_P font) {
   PGM_P tmp;
-  if (sizeof(tmp) == 2)
-    tmp = (PGM_P)pgm_read_word(&(font->widthtable));
-  else
-    memcpy_P((char*)&tmp,&(font->widthtable),sizeof(tmp));
+  memcpy_P((void*)&tmp,&(font->widthtable),sizeof(tmp));
   return tmp;
   }
 
@@ -98,7 +95,7 @@ inline PGM_P font_widthtable(FONT_P font) {
 /******************************************************************************
  * Loads the height (in bytes) of the given font
  */
-inline uint8_t font_get_height_bytes(FONT_P font) {
+uint8_t font_get_height_bytes(FONT_P font) {
   FONT_P tmp = font;
   uint8_t t = pgm_read_byte(&tmp->height);
   return (((uint8_t)(t-1)>>3)+1);
@@ -110,7 +107,7 @@ inline uint8_t font_get_height_bytes(FONT_P font) {
 /******************************************************************************
  * Get the number of the character in the given font
  */
-inline int16_t font_get_char_number(FONT_P font, char character) {
+int16_t font_get_char_number(FONT_P font, char character) {
   FONT_P tmp = font;
   if (character > pgm_read_byte(&tmp->lastchar)) 
     return -1;
@@ -124,7 +121,7 @@ inline int16_t font_get_char_number(FONT_P font, char character) {
 /******************************************************************************
  * Read the width of the selected character from the font width table
  */
-inline uint8_t font_get_char_width(FONT_P font, char character) {
+uint8_t font_get_char_width(FONT_P font, char character) {
   PGM_P table = font_widthtable(font);
   if (table)
     return pgm_read_byte(table+font_get_char_number(font,character));
@@ -159,7 +156,7 @@ PGM_P font_get_char_position(FONT_P font, char character) {
  * part = 1:  abcdefgh -> aabbccdd
  * Used for double height font
  */
-inline unsigned char double_bits(uint8_t part, char c) {
+unsigned char double_bits(uint8_t part, char c) {
   uint8_t t = 0;
   if (part) c = c>>4;
   if (c & 0x08) t  = 0xC0;

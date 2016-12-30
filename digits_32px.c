@@ -12,7 +12,7 @@
     Font bits per pixel : 1
 */
 
-#include "../font.h"
+#include "font.h"
 #ifdef FONTS_INCLUDE_digits_32px
 
 

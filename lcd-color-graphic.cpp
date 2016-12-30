@@ -5,7 +5,25 @@
  *   - well... everything.
  *****************************************************************************/
 
+#include <SPI.h>
+
+
+
+extern "C" {
 #include "lcd-color-graphic.h"
+#include "font.h"
+}
+
+void LCD_INIT_SPI() {
+  SPI.begin();
+//  SPI.setClockDivider(SPI_CLOCK_DIV2);
+  SPI.setFrequency(9000000);
+}
+
+void spi_write(uint8_t i) {
+  SPI.transfer(i);
+}
+
 
 
 /******************************************************************************
@@ -23,16 +41,16 @@ color_t background = {.red=0,    .green=0,    .blue=0};
   */
 void lcd_init() {
   LCD_SET_PIN_DIRECTIONS();  //set outputs
-  _delay_ms(1);
+  delay(1);
   LCD_INIT_SPI();            //Initialize SPI Interface  
-  _delay_ms(50);
+  delay(50);
   LCD_RESET_ON();            //Apply Reset to the Display Controller  
-  _delay_ms(100); 
+  delay(100); 
   LCD_RESET_OFF();  
-  _delay_ms(100);
+  delay(100);
   LCD_SELECT();               //Switches chip select on
   lcd_command(LCD_SLEEP_OUT); //Wake up LCD
-  _delay_ms(70);
+  delay(70);
   return;
   }
 
@@ -40,7 +58,7 @@ void lcd_init() {
 /******************************************************************************
   * Sends a command to the display
   */
-inline void lcd_command(uint8_t c) {
+void lcd_command(uint8_t c) {
   spi_wait_for_idle();
   LCD_CMD();
   spi_write(c);
@@ -49,7 +67,7 @@ inline void lcd_command(uint8_t c) {
 /******************************************************************************
   * Sends a command with one argument
   */
-inline void lcd_command_1(uint8_t c, uint8_t data) {
+void lcd_command_1(uint8_t c, uint8_t data) {
   lcd_command(c);
   lcd_data(data);
 }  
@@ -57,7 +75,7 @@ inline void lcd_command_1(uint8_t c, uint8_t data) {
 /******************************************************************************
   * Sends a data word to the display
   */
-inline void lcd_data(uint8_t c) {
+void lcd_data(uint8_t c) {
   spi_wait_for_idle();
   LCD_DATA();
   spi_write(c);
@@ -68,7 +86,7 @@ inline void lcd_data(uint8_t c) {
 /******************************************************************************
   * Stores the main drawing color for later use
   */
-inline void lcd_set_foreground(uint8_t r, uint8_t g, uint8_t b) {
+void lcd_set_foreground(uint8_t r, uint8_t g, uint8_t b) {
   foreground.red = r;
   foreground.green = g;
   foreground.blue = b;
@@ -78,7 +96,7 @@ inline void lcd_set_foreground(uint8_t r, uint8_t g, uint8_t b) {
 /******************************************************************************
   * Stores the background color for later use
   */
-inline void lcd_set_background(uint8_t r, uint8_t g, uint8_t b) {
+void lcd_set_background(uint8_t r, uint8_t g, uint8_t b) {
   background.red = r;
   background.green = g;
   background.blue = b;
@@ -88,7 +106,7 @@ inline void lcd_set_background(uint8_t r, uint8_t g, uint8_t b) {
 /******************************************************************************
   * Sets the column range used for the next write operation
   */
-inline void lcd_set_column(uint16_t start, uint16_t end) {
+void lcd_set_column(uint16_t start, uint16_t end) {
   lcd_command(LCD_SET_COLUMN);
   lcd_data(start >> 8);
   lcd_data(start);
@@ -99,7 +117,7 @@ inline void lcd_set_column(uint16_t start, uint16_t end) {
 /******************************************************************************
   * Sets the page range used for the next write operation
   */
-inline void lcd_set_page(uint16_t start, uint16_t end) {
+void lcd_set_page(uint16_t start, uint16_t end) {
   lcd_command(LCD_SET_PAGE);
   lcd_data(start >> 8);
   lcd_data(start);
@@ -110,7 +128,7 @@ inline void lcd_set_page(uint16_t start, uint16_t end) {
 /******************************************************************************
   * Writes a pixel to the display using 16 Bit color mode
   */
-inline void lcd_send_pixel(color_t c) {
+void lcd_send_pixel(color_t c) {
   lcd_data((c.red<<3) | (c.green>>3));
   lcd_data((c.green<<5) | c.blue);
   }  
@@ -118,7 +136,7 @@ inline void lcd_send_pixel(color_t c) {
 /******************************************************************************
   * Sets a pixel at a given position
   */
-inline void lcd_set_pixel_xy(uint16_t column, uint16_t page) {
+void lcd_set_pixel_xy(uint16_t column, uint16_t page) {
   lcd_set_page(page,page);
   lcd_set_column(column,column);
   lcd_command(LCD_WRITE_MEM);

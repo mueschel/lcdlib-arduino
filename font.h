@@ -1,14 +1,13 @@
 #ifndef FONT_H_INCLUDED
 #define FONT_H_INCLUDED
 
-#include <avr/io.h>
-#include <avr/pgmspace.h>
+#include <pgmspace.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 //Include your LCD graphics library here
-#include "dogm-graphic.h"
+#include "lcd-color-graphic.h"
 //declare font info structure defined below
 struct font_info;
 typedef const struct font_info * FONT_P;
@@ -32,7 +31,7 @@ typedef const struct font_info * FONT_P;
 
 //Set to 1 to include functions for direct output of integer & float values
 #define INCLUDE_FLOAT_OUTPUT     0
-#define INCLUDE_INTEGER_OUTPUT   1
+#define INCLUDE_INTEGER_OUTPUT   0
 
 
 /*****************************************************************************
@@ -83,7 +82,7 @@ typedef const struct font_info * FONT_P;
 
 #define LCD_MOVE(x,y)      lcd_move_xy((x),(y))     //relative cursor movement
 #define LCD_MOVE_TO(x,y)   lcd_moveto_xy((x),(y))   //absolute cursor movement
-#define LCD_WRITE(x)       lcd_data((x))            //write data to display
+#define LCD_WRITE(x)       lcd_write_font_byte((x))            //write data to display
 
 //Functions to read the current position as provided by the LCD library
 #define LCD_CURRENT_COL()   lcd_get_position_column()

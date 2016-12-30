@@ -1,11 +1,8 @@
 #ifndef LCD_H_INCLUDED
 #define LCD_H_INCLUDED
 
-#include <avr/io.h>
 #include <inttypes.h>
 #include <string.h>
-#include <util/delay.h>
-#include <avr/pgmspace.h>
 
 
 /*****************************************************************************
@@ -17,42 +14,9 @@
 //Should chip select (CS) be used?
 #define LCD_USE_CHIPSELECT  1
 
-//CD Port
-#define PORT_DC  PORTB
-#define DDR_DC   DDRB
-#define PIN_DC   0
+//Define a function that waits until SPI interface is idle (not needed here)
+#define spi_wait_for_idle() 
 
-//Reset Port
-#define PORT_RST PORTA
-#define DDR_RST  DDRA
-#define PIN_RST  4
-
-//Chip select
-#if LCD_USE_CHIPSELECT == 1
-  #define PORT_CS  PORTB
-  #define DDR_CS   DDRB
-  #define PIN_CS   1
-#endif
-
-//SPI routines
-//Define a function that initializes the SPI interface, see below for an example
-extern void init_spi_lcd(void);
-#define LCD_INIT_SPI() init_spi_lcd()
-
-//Define a function that waits until SPI interface is idle
-#define spi_wait_for_idle() while(! (SPSR0 & _BV(SPIF0)));
-
-//Define how to write to SPI data register
-#define spi_write(i) SPDR0 = i
-
-/*Example SPI setup (Atmega162)
- *init spi: msb first, update on falling edge , read on rising edge, 9 MHz
- *void init_spi_lcd() {
- *  SPCR = 0 << SPIE | 1 << SPE | 0 << DORD | 1 << MSTR | 1 << CPOL | 1 << CPHA | 0 << SPR1 | 0 << SPR0;
- *  SPSR = 1 << SPI2X;
- *  SPDR = LCD_NO_OP; //Do not use 0 here, only LCD_NOP is allowed!
- *  }
- */
 /*****************************************************************************
  * END CONFIG BLOCK
  *****************************************************************************/
@@ -150,24 +114,24 @@ typedef struct {
  *****************************************************************************/
 
 //Control A0 input of LCD
-#define LCD_DATA()            PORT_DC |= _BV(PIN_DC)
-#define LCD_CMD()             PORT_DC &= ~_BV(PIN_DC)
-#define LCD_SET_OUTPUT_DC()   DDR_DC  |= _BV(PIN_DC)
+#define LCD_DATA()            digitalWrite(2, 1);
+#define LCD_CMD()             digitalWrite(2, 0)
+#define LCD_SET_OUTPUT_DC()   pinMode(2, OUTPUT)
 
 //Control reset input of LCD
-#define LCD_RESET_OFF()       PORT_RST |= _BV(PIN_RST)
-#define LCD_RESET_ON()        PORT_RST &= ~_BV(PIN_RST)
-#define LCD_SET_OUTPUT_RST()  DDR_RST |= _BV(PIN_RST)
+#define LCD_RESET_OFF()       
+#define LCD_RESET_ON()        
+#define LCD_SET_OUTPUT_RST()  
 
 
 //Control pin for chip select
 #if LCD_USE_CHIPSELECT == 1
-  #define LCD_SET_OUTPUT_CS()  DDR_CS  |= _BV(PIN_CS)
-  #define LCD_SELECT()         PORT_CS &= ~_BV(PIN_CS)
-  #define LCD_UNSELECT()       spi_wait_for_idle(); PORT_CS |= _BV(PIN_CS)
+  #define LCD_SET_OUTPUT_CS()  pinMode(15, OUTPUT)
+  #define LCD_SELECT()         digitalWrite(15, 0)
+  #define LCD_UNSELECT()       digitalWrite(15, 1)
 #else
   #define LCD_SET_OUTPUT_CS()  
-  #define LCD_SELECT()         spi_wait_for_idle();
+  #define LCD_SELECT()         
   #define LCD_UNSELECT()   
 #endif
 
